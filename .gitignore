@@ -1,0 +1,11 @@
+# Ignore vscode setting and pycache files
+.vscode
+src/__pycache__
+src/utils/__pycache__
+
+# Ignoreing test files and directories
+.tests
+
+# Ignoring Application Setup file
+Kraftfile
+server.py
