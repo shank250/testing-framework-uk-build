@@ -1,3 +1,6 @@
+#Ignore python virtual environment
+testing-fw-venv/
+
 # Ignore vscode setting and pycache files
 .vscode
 src/__pycache__
