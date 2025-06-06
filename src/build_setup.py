@@ -35,8 +35,9 @@ class BuildSetup:
             self.kernel_path = os.path.join(
                 os.path.join(os.path.join(self.dir, ".unikraft"), "bin"), "kernel"
             )
-
-    def get_build_tools(self, plat, arch):
+    
+    @staticmethod
+    def get_build_tools(plat, arch):
         """Get the list the potential build tools."""
 
         return ["make", "kraft"]
