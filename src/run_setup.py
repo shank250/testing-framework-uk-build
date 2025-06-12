@@ -1,4 +1,9 @@
+"""
+This module provides the RunSetup class to manage the run setup for applications.
+"""
+
 import os
+
 from constants import SCRIPT_DIR
 
 
@@ -24,6 +29,7 @@ class RunSetup:
         self.app_config = app_config
         self.sys_arch = sys_arch
 
+    @staticmethod
     def get_run_tools(plat, arch):
         """Get the list the potential run tool types."""
 
@@ -53,13 +59,13 @@ class RunSetup:
         if self.target_config["run"]["vmm"]:
             vmm = self.target_config["run"]["vmm"]["path"]
         hypervisor_option = ""
-        if self.config['hypervisor'] != 'none':
-            if self.target_config['build']['platform'] == 'qemu':
-                if self.config['run_tool'] == 'vmm':
+        if self.config["hypervisor"] != "none":
+            if self.target_config["build"]["platform"] == "qemu":
+                if self.config["run_tool"] == "vmm":
                     hypervisor_option = "-enable-kvm"
-        if self.config['hypervisor'] == 'none':
-            if self.target_config['build']['platform'] == 'qemu':
-                if self.config['run_tool'] == 'kraft':
+        if self.config["hypervisor"] == "none":
+            if self.target_config["build"]["platform"] == "qemu":
+                if self.config["run_tool"] == "kraft":
                     hypervisor_option = "-W"
         machine = ""
         if arch != self.sys_arch:
@@ -68,7 +74,9 @@ class RunSetup:
             name = ""
 
         if self.app_config.has_template():
-            app_dir = os.path.join(os.path.join(self.target_config["base"], "apps"), self.app_config.config['template'])
+            app_dir = os.path.join(
+                os.path.join(self.target_config["base"], "apps"), self.app_config.config["template"]
+            )
         else:
             app_dir = os.getcwd()
 
@@ -93,32 +101,44 @@ class RunSetup:
 
         if self.app_config.has_einitrd() or not self.app_config.has_rootfs():
             if self.config["networking"] == "none":
-                self._generate_fc_config_from_template(f"tpl_run_firecracker_nonet_noinitrd.json")
-                self._generate_run_script_from_template(f"tpl_run_firecracker_nonet_noinitrd.sh")
+                self._generate_fc_config_from_template("tpl_run_firecracker_nonet_noinitrd.json")
+                self._generate_run_script_from_template("tpl_run_firecracker_nonet_noinitrd.sh")
             else:
-                self._generate_fc_config_from_template(f"tpl_run_firecracker_net_{self.config['networking']}_noinitrd.json")
-                self._generate_run_script_from_template(f"tpl_run_firecracker_net_{self.config['networking']}_noinitrd.sh")
+                self._generate_fc_config_from_template(
+                    f"tpl_run_firecracker_net_{self.config['networking']}_noinitrd.json"
+                )
+                self._generate_run_script_from_template(
+                    f"tpl_run_firecracker_net_{self.config['networking']}_noinitrd.sh"
+                )
         else:
             if self.config["networking"] == "none":
-                self._generate_fc_config_from_template(f"tpl_run_firecracker_nonet_initrd.json")
-                self._generate_run_script_from_template(f"tpl_run_firecracker_nonet_initrd.sh")
+                self._generate_fc_config_from_template("tpl_run_firecracker_nonet_initrd.json")
+                self._generate_run_script_from_template("tpl_run_firecracker_nonet_initrd.sh")
             else:
-                self._generate_fc_config_from_template(f"tpl_run_firecracker_net_{self.config['networking']}_initrd.json")
-                self._generate_run_script_from_template(f"tpl_run_firecracker_net_{self.config['networking']}_initrd.sh")
+                self._generate_fc_config_from_template(
+                    f"tpl_run_firecracker_net_{self.config['networking']}_initrd.json"
+                )
+                self._generate_run_script_from_template(
+                    f"tpl_run_firecracker_net_{self.config['networking']}_initrd.sh"
+                )
 
     def _generate_qemu(self):
         """Generate QEMU run script (`run`)."""
 
         if self.app_config.has_einitrd() or not self.app_config.has_rootfs():
             if self.config["networking"] == "none":
-                self._generate_run_script_from_template(f"tpl_run_qemu_net_nat_noinitrd.sh")
+                self._generate_run_script_from_template("tpl_run_qemu_net_nat_noinitrd.sh")
             else:
-                self._generate_run_script_from_template(f"tpl_run_qemu_net_{self.config['networking']}_noinitrd.sh")
+                self._generate_run_script_from_template(
+                    f"tpl_run_qemu_net_{self.config['networking']}_noinitrd.sh"
+                )
         else:
             if self.config["networking"] == "none":
-                self._generate_run_script_from_template(f"tpl_run_qemu_net_nat_initrd.sh")
+                self._generate_run_script_from_template("tpl_run_qemu_net_nat_initrd.sh")
             else:
-                self._generate_run_script_from_template(f"tpl_run_qemu_net_{self.config['networking']}_initrd.sh")
+                self._generate_run_script_from_template(
+                    f"tpl_run_qemu_net_{self.config['networking']}_initrd.sh"
+                )
 
     def _generate_xen(self):
         """Generate Xen configuration file (`xen.cfg`) and run script (`run`)."""
@@ -129,19 +149,21 @@ class RunSetup:
         """Generate Kraft run script (`run`)."""
 
         if self.config["networking"] == "none":
-            self._generate_run_script_from_template(f"tpl_run_kraft_nonet.sh")
+            self._generate_run_script_from_template("tpl_run_kraft_nonet.sh")
         else:
-            self._generate_run_script_from_template(f"tpl_run_kraft_net_{self.config['networking']}.sh")
+            self._generate_run_script_from_template(
+                f"tpl_run_kraft_net_{self.config['networking']}.sh"
+            )
 
     def generate(self):
         """Generate run configuration file and scripts according to run tool (and VMM)."""
-        
-        if self.config['run_tool'] == 'vmm':
-            if self.target_config['build']['platform'] == 'fc':
+
+        if self.config["run_tool"] == "vmm":
+            if self.target_config["build"]["platform"] == "fc":
                 self._generate_firecracker()
-            elif self.target_config['build']['platform'] == 'qemu':
+            elif self.target_config["build"]["platform"] == "qemu":
                 self._generate_qemu()
-            elif self.target_config['build']['platform'] == 'xen':
+            elif self.target_config["build"]["platform"] == "xen":
                 self._generate_xen()
-        elif self.config['run_tool'] == 'kraft':
+        elif self.config["run_tool"] == "kraft":
             self._generate_kraft()

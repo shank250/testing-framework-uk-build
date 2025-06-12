@@ -1,6 +1,10 @@
+"""
+This module provides the SystemConfig class to extract system configuration information.
+"""
+
+import platform
 import re
 import shutil
-import platform
 import subprocess
 
 
@@ -22,11 +26,7 @@ class SystemConfig:
         """
 
         info = platform.uname()
-        self.os = {
-                "type": info.system,
-                "kernel_version": info.release,
-                "distro": None
-                }
+        self.os = {"type": info.system, "kernel_version": info.release, "distro": None}
         if self.os["type"] == "Linux":
             self.os["distro"] = platform.freedesktop_os_release()["ID"]
 
@@ -41,8 +41,7 @@ class SystemConfig:
             self.arch = "arm64"
 
     def get_arch(self):
-        """Return machine architecture information.
-        """
+        """Return machine architecture information."""
 
         return self.arch
 
@@ -73,9 +72,11 @@ class SystemConfig:
         """
 
         cmds = []
-        with subprocess.Popen(["bash", "-c", f"compgen -A command {string}"], stdout=subprocess.PIPE) as proc:
+        with subprocess.Popen(
+            ["bash", "-c", f"compgen -A command {string}"], stdout=subprocess.PIPE
+        ) as proc:
             for l in proc.stdout.readlines():
-                l = l.decode('utf-8').strip()
+                l = l.decode("utf-8").strip()
                 if re.match(pattern, l):
                     cmds.append(l)
 
@@ -98,15 +99,9 @@ class SystemConfig:
         fc_x86_64_paths = self._get_paths("firecracker-", "^firecracker-x86_64")
         fc_arm64_paths = self._get_paths("firecracker-", "^firecracker-aarch64")
         self.vmms = {
-                'arm64': {
-                    'qemu': qemu_arm64_paths,
-                    'fc': fc_arm64_paths
-                    },
-                'x86_64': {
-                    'qemu': qemu_x86_64_paths,
-                    'fc': fc_x86_64_paths
-                    }
-                }
+            "arm64": {"qemu": qemu_arm64_paths, "fc": fc_arm64_paths},
+            "x86_64": {"qemu": qemu_x86_64_paths, "fc": fc_x86_64_paths},
+        }
 
     def _get_compilers(self):
         """Get compilers information.
@@ -118,15 +113,9 @@ class SystemConfig:
         gcc_arm64_paths = self._get_paths("aarch64-linux-gnu-gcc-", "aarch64-linux-gnu-gcc-[0-9]+$")
         clang_paths = self._get_paths("clang-", "^clang-[0-9]+$")
         self.compilers = {
-                'arm64': {
-                    'gcc': gcc_arm64_paths,
-                    'clang': clang_paths
-                    },
-                'x86_64': {
-                    'gcc': gcc_x86_64_paths,
-                    'clang': clang_paths
-                    }
-                }
+            "arm64": {"gcc": gcc_arm64_paths, "clang": clang_paths},
+            "x86_64": {"gcc": gcc_x86_64_paths, "clang": clang_paths},
+        }
 
     def get_vmms(self, plat, arch):
         """Get available VMMs for platform and architecture.
@@ -135,15 +124,12 @@ class SystemConfig:
         """
 
         ret_list = []
-        if not arch in self.vmms.keys():
+        if not arch in self.vmms:
             return []
-        if not plat in self.vmms[arch].keys():
+        if not plat in self.vmms[arch]:
             return []
         for v in self.vmms[arch][plat]:
-            ret_list.append({
-                "type": plat,
-                "path": v
-                })
+            ret_list.append({"type": plat, "path": v})
         return ret_list
 
     def get_compilers(self, plat, arch):
@@ -157,10 +143,7 @@ class SystemConfig:
         ret_list = []
         for k, v in self.compilers[arch].items():
             for l in v:
-                ret_list.append({
-                    "type": k,
-                    "path": l
-                    })
+                ret_list.append({"type": k, "path": l})
         return ret_list
 
     def __init__(self):
@@ -189,7 +172,9 @@ class SystemConfig:
         comp_list.extend(self.compilers["x86_64"]["clang"])
         comp_str = ", ".join(comp for comp in comp_list)
 
-        return f'os: {self.os["type"]}, kernel: {self.os["kernel_version"]}, ' \
-                f'distro: {self.os["distro"]}, arch: {self.arch}, ' \
-                f'hypervisor: {self.hypervisor}, vmms: {vmm_str}, ' \
-                f'compilers: {comp_str}'
+        return (
+            f'os: {self.os["type"]}, kernel: {self.os["kernel_version"]}, '
+            f'distro: {self.os["distro"]}, arch: {self.arch}, '
+            f"hypervisor: {self.hypervisor}, vmms: {vmm_str}, "
+            f"compilers: {comp_str}"
+        )

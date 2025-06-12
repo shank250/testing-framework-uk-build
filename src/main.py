@@ -1,12 +1,17 @@
+"""
+This module is the main entry point for the testing framework.
+"""
+
 import os
 import sys
+
+from app_config import AppConfig
 from build_setup import BuildSetup
 from run_setup import RunSetup
-from tester_config import TesterConfig
-from app_config import AppConfig
 from system_config import SystemConfig
 from target_setup import TargetSetup
 from test_runner import TestRunner
+from tester_config import TesterConfig
 from utils.cleanup import cleanup_folder
 from utils.file_utils import copy_common
 
@@ -19,32 +24,33 @@ def generate_target_configs(tester_config, app_config, system_config):
 
     Return list of all target configurations in `targets` variable.
     """
-    
-    for (plat, arch) in app_config.config['targets']:
+
+    for plat, arch in app_config.config["targets"]:
         vmms = system_config.get_vmms(plat, arch)
         compilers = system_config.get_compilers(plat, arch)
         build_tools = BuildSetup.get_build_tools(plat, arch)
         run_tools = RunSetup.get_run_tools(plat, arch)
         tester_config.generate_target_configs(
-            plat, arch, 
-            system_config.get_arch(),
-            vmms, compilers, build_tools, run_tools
+            plat, arch, system_config.get_arch(), vmms, compilers, build_tools, run_tools
         )
 
     targets = []
     for config in tester_config.get_target_configs():
         t = TargetSetup(config, app_config, system_config)
         targets.append(t)
-    
+
     return targets
 
 
 def usage(argv0):
+    """Prints the usage instructions for the script."""    
     print(f"Usage: {argv0} <path/to/tester.yaml>", file=sys.stderr)
 
 
 def main():
-    if (len(sys.argv) != 2):
+    """Main entry point for the testing framework."""
+
+    if len(sys.argv) != 2:
         usage(sys.argv[0])
         sys.exit(1)
 
@@ -63,10 +69,11 @@ def main():
         targets = generate_target_configs(t, a, s)
         for t in targets:
             t.generate()
-    
+
     finally:
         # cleanup_folder()
         pass
+
 
 if __name__ == "__main__":
     sys.exit(main())
