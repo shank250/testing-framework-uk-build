@@ -229,6 +229,7 @@ class BuildSetup:
     def _get_compiler_vars(self):
         """Generate compiler variables, typically CROSS_COMPILE and COMPILER."""
 
+        cross_compile, compiler = "", ""
         if self.config["arch"] == "x86_64":
             return ("", self.config["compiler"]["path"])
         if self.config["arch"] == "arm64":
