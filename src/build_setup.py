@@ -231,12 +231,13 @@ class BuildSetup:
 
         cross_compile, compiler = "", ""
         if self.config["arch"] == "x86_64":
-            return ("", self.config["compiler"]["path"])
+            compiler = self.config["compiler"]["path"]
         if self.config["arch"] == "arm64":
             idx = self.config["compiler"]["path"].find(self.config["compiler"]["type"])
             cross_compile = f"export CROSS_COMPILE={self.config['compiler']['path'][0:idx]}"
             compiler = self.config["compiler"]["path"][idx:]
-            return (cross_compile, compiler)
+        
+        return (cross_compile, compiler)
 
     def _generate_build_make(self):
         """Generate build script for Make-based build."""
