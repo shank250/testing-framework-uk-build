@@ -10,5 +10,4 @@ src/utils/__pycache__
 .tests
 
 # Ignoring Application Setup file
-Kraftfile
-server.py
+.app/
