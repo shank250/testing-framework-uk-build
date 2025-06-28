@@ -41,7 +41,6 @@ class RunSetup:
         A template file stores variables that are to be replaced. Such variables
         define platform, architecture, used memory etc.
         """
-
         with open(os.path.join(SCRIPT_DIR, template_name), "r", encoding="utf-8") as stream:
             raw_content = stream.read()
 
