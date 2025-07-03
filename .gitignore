@@ -217,4 +217,5 @@ __marimo__/
 
 # Ignoring Application Setup file
 .app/
+.rootfs-for-testing
 
