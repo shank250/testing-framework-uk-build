@@ -11,3 +11,6 @@ src/utils/__pycache__
 
 # Ignoring Application Setup file
 .app/
+
+
+.rootfs-for-testing
