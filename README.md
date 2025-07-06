@@ -1,5 +1,10 @@
 #  Testing Framework for Unikraft Builds
 
+![License](https://img.shields.io/badge/license-BSD--3--Clause-blue.svg)
+![Python](https://img.shields.io/badge/python-3.10%2B-blue.svg)
+![GSoC](https://img.shields.io/badge/GSoC-2025-orange)
+![Code Style: Black](https://img.shields.io/badge/code%20style-black-000000.svg)
+
 A modular and extensible Python-based testing framework for validating Unikraft unikernel builds across various configurations, platforms, and environments. This tool is designed to be seamlessly integrated into the CI/CD pipelines of the Unikraft ecosystem.
 
 ##  Overview
@@ -45,6 +50,26 @@ source:
   base: /absolute/path/to/your/unikraft/root
 ```
 
+### Sudo Setup 
+
+This project uses a shell script that requires sudo access. To avoid being prompted for a password every time the script runs, follow these steps:
+
+- Open the sudoers file using the safe editor:
+    ```console
+    sudo visudo
+    ```
+
+- Add the following line at the end (replace your_username and /path/to/dir):
+    ```console
+    your_username ALL=(ALL) NOPASSWD: /path/to/dir
+    ```
+
+    ```console
+    machine02 ALL=(ALL) NOPASSWD: /usr/bin/pkill, /usr/bin/kraft, /usr/sbin/ip, /usr/bin/rm, /usr/local/bin/firecracker-x86_64, /usr/bin/qemu-system-x86_64
+    
+    Defaults env_keep += "KRAFTKIT_NO_WARN_SUDO KRAFTKIT_BUILDKIT_HOST"
+    ```
+
 ### Running the Framework
 
 To run the framework, use the following command:
@@ -55,18 +80,15 @@ To run the framework, use the following command:
 
 Make sure the path you provide is absolute (i.e., it starts with /). This should point to the specific application directory inside your catalog repository.
 
-## Sudo Setup 
+## 🤝 Contributing
 
-This project uses a shell script that requires sudo access. To avoid being prompted for a password every time the script runs, follow these steps:
+We welcome contributions from the community!  
+If you're interested in contributing to this testing framework, please read our [CONTRIBUTING.md](./CONTRIBUTING.md) guide for instructions on how to get started.
 
-- Open the sudoers file using the safe editor:
-    ```
-    sudo visudo
-    ```
+Whether it's reporting bugs, suggesting features, or submitting pull requests — your input is appreciated!
 
-- Add the following line at the end (replace your_username and /path/to/your/script.sh):
-    ```
-    your_username ALL=(ALL) NOPASSWD: /path/to/pkill /path/to/kraft
-    ```
-    
-    You may use `which pkill` to know the correct path.
+## 📄 License
+
+This project is licensed under the [BSD 3-Clause License](./COPYING.md).
+
+By contributing to this repository, you agree that your contributions will be licensed under the same terms.
