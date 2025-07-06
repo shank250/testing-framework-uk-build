@@ -78,3 +78,8 @@ If you're interested in contributing to this testing framework, please read our 
 
 Whether it's reporting bugs, suggesting features, or submitting pull requests — your input is appreciated!
 
+## 📄 License
+
+This project is licensed under the [BSD 3-Clause License](./COPYING.md).
+
+By contributing to this repository, you agree that your contributions will be licensed under the same terms.
