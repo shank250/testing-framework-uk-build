@@ -47,16 +47,6 @@ source:
   base: /absolute/path/to/your/unikraft/root
 ```
 
-### Running the Framework
-
-To run the framework, use the following command:
-
-```console
-./main.sh /absolute/path/to/app/dir
-```
-
-Make sure the path you provide is absolute (i.e., it starts with /). This should point to the specific application directory inside your catalog repository.
-
 ## Sudo Setup 
 
 This project uses a shell script that requires sudo access. To avoid being prompted for a password every time the script runs, follow these steps:
@@ -68,5 +58,26 @@ This project uses a shell script that requires sudo access. To avoid being promp
 
 - Add the following line at the end (replace your_username and /path/to/your/script.sh):
 
-    `your_username ALL=(ALL) NOPASSWD: /path/to/your/script.sh or /path/to/pkill`
+    ```
+    your_username ALL=(ALL) NOPASSWD: /path/to/pkill /path/to/kraft
+    ```
+    
     You may use `which pkill` to know the correct path.
+
+### Running the Framework
+
+To run the framework, use the following command:
+
+```console
+./main.sh /absolute/path/to/app/dir
+```
+
+Make sure the path you provide is absolute (i.e., it starts with /). This should point to the specific application directory inside your catalog repository.
+
+## 🤝 Contributing
+
+We welcome contributions from the community!  
+If you're interested in contributing to this testing framework, please read our [CONTRIBUTING.md](./CONTRIBUTING.md) guide for instructions on how to get started.
+
+Whether it's reporting bugs, suggesting features, or submitting pull requests — your input is appreciated!
+
