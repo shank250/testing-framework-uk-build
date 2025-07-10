@@ -219,3 +219,7 @@ __marimo__/
 .app/
 .rootfs-for-testing
 
+# Environment variables
+.env
+.rootfs-for-testing
+
