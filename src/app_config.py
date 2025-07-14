@@ -1,5 +1,5 @@
 """
-This module defines the AppConfig class, which is used to extract and store application 
+This module defines the AppConfig class, which is used to extract and store application
 configuration.
 """
 
@@ -11,9 +11,10 @@ import yaml
 
 from constants import SCRIPT_DIR
 from tester_config import TesterConfig
+from utils.base import Loggable
 
 
-class AppConfig:
+class AppConfig(Loggable):
     """Store application configuration.
 
     Configuration is read from the application configuration file (typically
@@ -64,7 +65,7 @@ class AppConfig:
         Return true or false.
         """
 
-        return self.config["unikraft"] is not  None
+        return self.config["unikraft"] is not None
 
     def is_example(self):
         """Check if application is an example.
@@ -137,41 +138,41 @@ class AppConfig:
                 targets.append((plat, arch))
             self.config["targets"] = targets
 
-    def _parse_user_config(self, user_config_file):
+    def _parse_user_config(self, run_config_file):
         """Parse config.yaml file.
 
         Populate corresponding entries in self.config.
         """
-
-        with open(user_config_file, "r", encoding="utf-8") as stream:
+        relative_path = self.app_dir.split("/catalog")[-1]
+        run_config_path = os.path.join("test-app-config/catalog" + relative_path, run_config_file)
+        
+        with open(run_config_path, "r", encoding="utf-8") as stream:
             data = yaml.safe_load(stream)
 
         self.config["networking"] = False
 
-        if not "networking" in data.keys():
+        if not "Networking" in data["RunMetadata"].keys():
             self.config["networking"] = False
         else:
-            self.config["networking"] = data["networking"]
+            self.config["networking"] = data["RunMetadata"]["Networking"]
 
         if not "test_dir" in data.keys():
             self.config["test_dir"] = None
         else:
             self.config["test_dir"] = data["test_dir"]
 
-        if not "memory" in data.keys():
-            print(
-                f"Error: 'memory' attribute is not defined in {user_config_file}'", file=sys.stderr
-            )
+        if not "Memory" in data["RunMetadata"].keys():
+            self.logger.warning(f"Error: 'memory' attribute is not defined in {run_config_path}.")
             sys.exit(1)
         else:
-            self.config["memory"] = data["memory"]
+            self.config["memory"] = data["RunMetadata"]["Memory"]
 
-        if not "exposed_port" in data.keys():
+        if not "ExposedPort" in data["RunMetadata"].keys():
             self.config["exposed_port"] = None
             self.config["public_port"] = None
         else:
-            self.config["exposed_port"] = data["exposed_port"]
-            self.config["public_port"] = data["public_port"]
+            self.config["exposed_port"] = data["RunMetadata"]["ExposedPort"]
+            self.config["public_port"] = data["RunMetadata"]["PublicPort"]
 
     def _parse_app_config(self, app_config_file):
         """Parse Kraftfile.
@@ -269,7 +270,7 @@ class AppConfig:
 
         if self.config["test_dir"]:
             # shank: Instance of 'AppConfig' has no 'user_config' member
-            test_dir = os.path.abspath(self.user_config["test_dir"])
+            test_dir = os.path.abspath(self.config["test_dir"])
         else:
             test_dir = os.path.abspath(".tests")
         if self.config["rootfs"]:
@@ -298,29 +299,34 @@ class AppConfig:
             stream.write(content)
         os.chmod(os.path.join(test_dir, "app_fs_init.sh"), 0o755)
 
+        self.logger.info("Running app_fs_init.sh")
+        log_file_path = os.path.join(test_dir, "app_fs_init.log")
         try:
-            print("Running app_fs_init.sh")
-            result = subprocess.run(["bash", os.path.join(test_dir, "app_fs_init.sh")],
-                                        stdout=subprocess.PIPE,
-                                        stderr=subprocess.PIPE,
-                                        text=True)
-            if result.stderr:
-                print(f"Error: {result.stderr}", file=sys.stderr)
+            with open(log_file_path, "w", encoding="utf-8") as log_file:
+                result = subprocess.run(
+                    ["bash", os.path.join(test_dir, "app_fs_init.sh")],
+                    stdout=log_file,
+                    stderr=log_file,
+                    text=True,
+                )
         except subprocess.CalledProcessError as e:
-            print(f"Error running app_fs_init.sh: {e}", file=sys.stderr)
-        print(f"Initialized application filesystem initrd.cpio is stored in {app_dir}/initrd.cpio")
+            self.logger.error(f"Error running app_fs_init.sh: {e}")
+        self.logger.info(
+            f"Initialized application filesystem initrd.cpio is stored in {app_dir}/initrd.cpio"
+        )
         self.initrd_cpio_path = os.path.join(app_dir, "initrd.cpio")
         return 0 if self.initrd_cpio_path is None else 1, self.initrd_cpio_path
 
-    def __init__(self, app_config=".app/Kraftfile", user_config="config.yaml"):
+    def __init__(self, app_dir: str, app_config=".app/Kraftfile", run_config="RunConfig.yaml"):
         """Initialize application configuration.
 
-        Parse application config (`Kraftfile`) and user config (`config.yaml`)
+        Parse application config (`Kraftfile`) and user run_config (`RunConfig.yaml`)
         and populate all entries in the self.config dictionary.
         """
-
+        super().__init__()
+        self.app_dir = app_dir
         self.config = {}
-        self._parse_user_config(user_config)
+        self._parse_user_config(run_config)
         self._parse_app_config(app_config)
         self.initrd_cpio_path = None
 
