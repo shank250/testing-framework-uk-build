@@ -40,16 +40,18 @@ class TestAppConfig(Loggable):
             raise ValueError(
                 f"Could not identify catalog or catalog-core in path: {directory_path}"
             )
-        
+
         filename = "RunConfig.yaml"
         target_path = Path(self.base_test_dir) / catalog_type / relative_path / filename
 
-        if target_path.exists():         
-            self.logger.info(f"RunConfig.yaml already exists at {target_path}, skipping generation.")
+        if target_path.exists():
+            self.logger.info(
+                f"RunConfig.yaml already exists at {target_path}, skipping generation."
+            )
             return True
 
         return False
-    
+
     def setup_config(self, source_directory: str) -> dict:
         """
         Process a catalog directory path and create a replica structure for testing.
@@ -89,7 +91,7 @@ class TestAppConfig(Loggable):
 
         # creating BuildConfig.yaml
         build_config_path = target_path / "BuildConfig.yaml"
-        self._save_config(build_config_path, "th_time: 180")
+        self._save_config(build_config_path, "th_time: 300")
 
         return {
             "source_directory": str(source_path),
