@@ -69,12 +69,13 @@ class SessionSetup:
 
         # Create session directory path: cwd/sessions/{tmp_app_directory_structure}/{session_name}
         self.session_dir = os.path.join(
-            cwd, "sessions", tmp_app_directory_structure, self.session_name
+            cwd, ".sessions", tmp_app_directory_structure, self.session_name
         )
+        self.session_reports_dir = os.path.join(self.session_dir, "reports")
 
         try:
             # Create the directory with parents=True to create all intermediate directories
-            os.makedirs(self.session_dir, exist_ok=True)
+            os.makedirs(self.session_reports_dir , exist_ok=True)
             self.logger.info(f"Session directory created: {self.session_dir}")
 
             return self.session_dir

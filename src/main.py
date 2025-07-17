@@ -22,7 +22,7 @@ from utils.logger import setup_logger
 from utils.setup_session import SessionSetup
 
 
-def generate_target_configs(tester_config, app_config, system_config):
+def generate_target_configs(tester_config, app_config, system_config, session):
     """Generate all possible target configurations for given application on given system.
 
     A target configuration will generate the corresponding build configuration and
@@ -42,7 +42,7 @@ def generate_target_configs(tester_config, app_config, system_config):
 
     targets = []
     for config in tester_config.get_target_configs():
-        t = TargetSetup(config, app_config, system_config)
+        t = TargetSetup(config, app_config, system_config, session=session)
         targets.append(t)
 
     return targets
@@ -143,13 +143,13 @@ def main():
 
         copy_common()
 
-        targets = generate_target_configs(t, a, s)
+        targets = generate_target_configs(t, a, s, session=session)
 
         for t in targets:
             t.generate()
 
         for target_config in targets:
-            runner = TestRunner(target_config, app_dir)
+            runner = TestRunner(target_config, app_dir, session)
             runner.run_test()
         logger.info("All tests completed successfully.")
 
