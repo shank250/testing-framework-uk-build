@@ -15,5 +15,8 @@ src/utils/__pycache__
 # Environment variables
 .env
 
-
+# Ignore rootfs for testing
 .rootfs-for-testing
+
+# Ignore sessions reports and logs
+.sessions/
