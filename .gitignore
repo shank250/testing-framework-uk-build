@@ -223,3 +223,9 @@ __marimo__/
 .env
 .rootfs-for-testing
 
+# Ignore rootfs for testing
+.rootfs-for-testing
+
+# Ignore sessions reports and logs
+.sessions/
+
