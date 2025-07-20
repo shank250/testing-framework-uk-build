@@ -19,7 +19,7 @@ class TesterConfig(Loggable):
     Provide configurations for target definition: get_target_configs()
     """
 
-    def __init__(self, variants_file="src/variants.yaml", config_file="src/tester_config.yaml"):
+    def __init__(self, variants_file="src/variants.yaml", config_file="src/config.yaml"):
         super().__init__()
         try:
             with open(variants_file, "r", encoding="utf8") as stream:
