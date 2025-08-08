@@ -20,3 +20,4 @@ src/utils/__pycache__
 
 # Ignore sessions reports and logs
 .sessions/
+logs
