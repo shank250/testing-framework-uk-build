@@ -228,4 +228,5 @@ __marimo__/
 
 # Ignore sessions reports and logs
 .sessions/
+logs
 
