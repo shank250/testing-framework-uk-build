@@ -11,7 +11,6 @@ testing-fw-venv/
 src/__pycache__
 src/utils/__pycache__
 
-
 # C extensions
 *.so
 
@@ -218,6 +217,13 @@ __marimo__/
 # Ignoring Application Setup file
 .app/
 .rootfs-for-testing
+# Ignoreing test files and directories
+.tests/
+.runtime_tests/
+
+# Ignoring Application Setup file
+.app/
+.runtime_app/
 
 # Environment variables
 .env
