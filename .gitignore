@@ -19,6 +19,8 @@ src/utils/__pycache__
 
 # Ignore rootfs for testing
 .rootfs-for-testing
+runtime_kernels/
+initrd.cpio
 
 # Ignore sessions reports and logs
 .sessions/
