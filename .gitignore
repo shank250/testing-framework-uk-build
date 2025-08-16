@@ -7,16 +7,20 @@ src/__pycache__
 src/utils/__pycache__
 
 # Ignoreing test files and directories
-.tests
+.tests/
+.runtime_tests/
 
 # Ignoring Application Setup file
 .app/
+.runtime_app/
 
 # Environment variables
 .env
 
 # Ignore rootfs for testing
 .rootfs-for-testing
+runtime_kernels/
+initrd.cpio
 
 # Ignore sessions reports and logs
 .sessions/

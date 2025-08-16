@@ -7,12 +7,15 @@ import os
 import subprocess
 import time
 from subprocess import PIPE, Popen, run
+import shlex  # Add this import for safely splitting shell commands
 
 import yaml
 
 from target_setup import TargetSetup
 from utils.base import Loggable
+from utils.process_utils import terminate_buildkitd
 from utils.setup_session import SessionSetup
+from constants import get_tests_folder
 
 
 class TestRunner(Loggable):
@@ -50,6 +53,13 @@ class TestRunner(Loggable):
 
         return None
 
+    def _terminate_buildkitd(self) -> None:
+        """
+        Terminate the buildkitd process if it is running.
+        """
+
+        terminate_buildkitd()
+
     def _build_target(self) -> int:
         """
         Build the target setup.
@@ -79,6 +89,10 @@ class TestRunner(Loggable):
         )
 
         threshold_timeout = self.test_build_config.get("th_time", 300)
+
+        # Terminate buildkitd process before starting kraft-based build
+        if self.target.config['build']['build_tool'] == 'kraft':
+            self._terminate_buildkitd()
 
         try:
             # Use subprocess.run with timeout for better control
@@ -162,10 +176,10 @@ class TestRunner(Loggable):
         """
         run_script_path = os.path.join(run_target_dir, "run")
 
-        tests_index = run_target_dir.find(".tests")
+        tests_index = run_target_dir.find(get_tests_folder())
         if tests_index == -1:
-            self.logger.error("Directory does not contain '.tests' segment, cannot write log file.")
-            raise ValueError("Directory does not contain '.tests' segment")
+            self.logger.error(f"Directory does not contain '{get_tests_folder()}' segment, cannot write log file.")
+            raise ValueError(f"Directory does not contain '{get_tests_folder()}' segment")
         test_dir_structure = run_target_dir[tests_index + 1 :]
 
         # Creating a new path for the sessions
@@ -421,11 +435,11 @@ class TestRunner(Loggable):
         Returns:
             str: The path to the log file if written successfully, otherwise an error message.
         """
-        # TODOs: Update this to the test app directory variable
-        tests_index = directory.find(".tests")
+        # TODO: Update this to the test app directory variable
+        tests_index = directory.find(get_tests_folder())
         if tests_index == -1:
-            self.logger.error("Directory does not contain '.tests' segment, cannot write log file.")
-            raise ValueError("Directory does not contain '.tests' segment")
+            self.logger.error(f"Directory does not contain '{get_tests_folder()}' segment, cannot write log file.")
+            raise ValueError(f"Directory does not contain '{get_tests_folder()}' segment")
         test_dir_structure = directory[tests_index + 1 :]
 
         # Creating a new path for the sessions
@@ -453,14 +467,20 @@ class TestRunner(Loggable):
         This method will execute the build and run configurations for the target.
         """
         self.logger.info(f"Running tests for target: {self.target.id}")
-        # Build the target before running tests(upto 2 mins)
-        build_return_code = self._build_target()
-        # Test if the build was successful
-        build_success = self._test_target_build(self.target.build_config.kernel_path)
-        # Update the build status in the test-app-config/build_report.csv
-        self._update_build_report(self.target, build_return_code, build_success)
-
-        if build_return_code == 0 and build_success:
+        
+        build_return_code, build_success = 0, True
+        if self.target.build_config.is_example and self.target.config['build']['build_tool'] == 'make':
+            pass
+        else:
+            # Build the target before running tests(upto 2 mins)
+            build_return_code = self._build_target()
+            # Test if the build was successful
+            print("----------------------",self.target.build_config.kernel_path)
+            build_success = self._test_target_build(self.target.build_config.kernel_path)
+            # Update the build status in the test-app-config/build_report.csv
+            self._update_build_report(self.target, build_return_code, build_success)
+        # WARNING: TODO: Update the condition after keeping runtime_kernel created by kraft fetched by oci registry 
+        if build_return_code == 0 and build_success or (self.target.build_config.is_example and self.target.config['build']['build_tool'] == 'kraft'):
             self.logger.info(f"[✓] Build successful for target: {self.target.id}")
 
             # Iterate over each of the runs
@@ -510,6 +530,11 @@ class TestRunner(Loggable):
 
                 # Update the run report
                 self._update_run_report(run_config, self.target.id, run_return_code, output_matched)
+
+                # Terminate buildkitd process after each kraft-based run
+                if self.target.config['build']['build_tool'] == 'kraft':
+                    self._terminate_buildkitd()
+                    self.logger.info(f"[✓] Terminated buildkitd process after kraft-based run {idx + 1} for target: {self.target.id}")
 
         else:
             self.logger.info(f"[✗] Build failed for target: {self.target.id}")
