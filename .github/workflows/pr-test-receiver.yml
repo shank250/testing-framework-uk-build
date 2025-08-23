@@ -1,0 +1,38 @@
+name: Testing framework
+on:
+  repository_dispatch:
+    types: [uk_pr_test]
+jobs:
+  pr-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PR head repo and branch
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.event.client_payload.pr_head_repo_full_name }}
+          ref: ${{ github.event.client_payload.pr_head_ref }}
+          fetch-depth: 0
+          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: Ensure exact commit is checked out
+        run: |
+          git fetch --no-tags --depth=1 origin ${{ github.event.client_payload.pr_head_sha }}
+          git checkout ${{ github.event.client_payload.pr_head_sha }}
+      - name: Print PR metadata
+        run: |
+          echo "PR Number: ${{ github.event.client_payload.pr_number }}"
+          echo "PR URL: ${{ github.event.client_payload.pr_url }}"
+          echo "PR Title: ${{ github.event.client_payload.pr_title }}"
+          echo "PR Body: ${{ github.event.client_payload.pr_body }}"
+          echo "PR Head Ref: ${{ github.event.client_payload.pr_head_ref }}"
+          echo "PR Head SHA: ${{ github.event.client_payload.pr_head_sha }}"
+          echo "PR Head Repo: ${{ github.event.client_payload.pr_head_repo_full_name }}"
+          echo "PR Is Fork: ${{ github.event.client_payload.pr_is_fork }}"
+          echo "PR Base Ref: ${{ github.event.client_payload.pr_base_ref }}"
+          echo "Sender: ${{ github.event.client_payload.sender_login }}"
+          echo "Action: ${{ github.event.client_payload.action }}"
+          echo "Timestamp: ${{ github.event.client_payload.timestamp }}"
+      - name: Run tests
+        run: |
+          # Replace with your test/build commands
+          echo "Need to implement actual tests here."
+          # Example: pytest, make test, etc.
