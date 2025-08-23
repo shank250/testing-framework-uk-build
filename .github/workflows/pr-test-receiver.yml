@@ -8,31 +8,28 @@ jobs:
   pr-test:
     runs-on: ubuntu-latest
     steps:
-      - name: Log incoming client_payload
+      - name: Dump client_payload
         run: |
           echo "client_payload: ${{ toJson(github.event.client_payload) }}"
-
-      - name: Checkout PR head repo and branch
-        uses: actions/checkout@v4
-        with:
-          # repository is the full name e.g. owner/repo (sent as pr_repo_name)
-          repository: ${{ github.event.client_payload.pr_repo_name }}
-          # ref is the branch/ref name sent as pr_head_ref
-          ref: ${{ github.event.client_payload.pr_head_ref }}
-          fetch-depth: 0
-          token: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Print checked out commit and basic meta
+      - name: Fetch PR via refs/pull and checkout
+        env:
+            PR_REPO: ${{ github.event.client_payload.pr_repo_name }}   # base repo (owner/repo)
+            PR_NUM: ${{ github.event.client_payload.pr_number }}
+            TOKEN: ${{ secrets.GH_PAT || secrets.GITHUB_TOKEN || '' }}
         run: |
-          echo "Checked-out repository: ${{ github.event.client_payload.pr_repo_name }}"
-          echo "Checked-out ref: ${{ github.event.client_payload.pr_head_ref }}"
-          echo "Current commit: $(git rev-parse HEAD)"
-          echo "PR Number: ${{ github.event.client_payload.pr_number }}"
-          echo "PR URL: ${{ github.event.client_payload.pr_url }}"
+            set -e
+            # Use token in remote URL only if set (keeps public clones unauthenticated)
+            if [ -n "$TOKEN" ]; then
+            remote="https://x-access-token:${TOKEN}@github.com/${PR_REPO}.git"
+            else
+            remote="https://github.com/${PR_REPO}.git"
+            fi
 
-      - name: Run tests
-        run: |
-          echo "Start tests (replace with real commands)"
-          # e.g.: make -C tests test
-          # or: pytest -q
-          echo "Done"
+            echo "Fetching refs/pull/${PR_NUM}/head from ${PR_REPO}"
+            # Start a fresh repo in workspace
+            git init .
+            git remote add origin "$remote"
+            # Fetch the PR head into a local branch 'pr-branch'
+            git fetch --no-tags --depth=1 origin "refs/pull/${PR_NUM}/head:pr-branch"
+            git checkout pr-branch
+            echo "Now at commit: $(git rev-parse HEAD)"
