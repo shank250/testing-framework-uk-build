@@ -27,7 +27,7 @@ class AppResult:
     return_code: int
     status: str  # "ok" or "fail"
     timestamp: str
-    detail_report: str = field(default="")
+    detail_report: dict = field(default_factory=dict)
 
 
 class CIReport:
@@ -112,9 +112,9 @@ class CIReport:
             'build_report': read_csv(build_csv),
         }
         try:
-            result.detail_report = json.dumps(data, separators=(',', ':'))
+            result.detail_report = data
         except Exception:
-            result.detail_report = ''
+            result.detail_report = {}
 
     def generate_report(self) -> str:
         """Write a JSON report file and return its path.
